@@ -98,6 +98,7 @@ var migrations = []migration{
 				id text not null primary key,
 				client_id text not null,
 				response_types bytea not null, -- JSON array of strings
+				response_mode text not null,
 				scopes bytea not null,         -- JSON array of strings
 				redirect_uri text not null,
 				nonce text not null,

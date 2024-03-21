@@ -332,6 +332,7 @@ type AuthRequest struct {
 
 	ClientID      string   `json:"clientID"`
 	ResponseTypes []string `json:"responseTypes,omitempty"`
+	ResponseMode  string   `json:"responseMode,omitempty"`
 	Scopes        []string `json:"scopes,omitempty"`
 	RedirectURI   string   `json:"redirectURI"`
 
@@ -372,6 +373,7 @@ func toStorageAuthRequest(req AuthRequest) storage.AuthRequest {
 		ID:                  req.ObjectMeta.Name,
 		ClientID:            req.ClientID,
 		ResponseTypes:       req.ResponseTypes,
+		ResponseMode:        req.ResponseMode,
 		Scopes:              req.Scopes,
 		RedirectURI:         req.RedirectURI,
 		Nonce:               req.Nonce,
@@ -403,6 +405,7 @@ func (cli *client) fromStorageAuthRequest(a storage.AuthRequest) AuthRequest {
 		},
 		ClientID:            a.ClientID,
 		ResponseTypes:       a.ResponseTypes,
+		ResponseMode:        a.ResponseMode,
 		Scopes:              a.Scopes,
 		RedirectURI:         a.RedirectURI,
 		Nonce:               a.Nonce,

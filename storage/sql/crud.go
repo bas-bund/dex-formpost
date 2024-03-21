@@ -127,7 +127,7 @@ func (c *conn) GarbageCollect(now time.Time) (storage.GCResult, error) {
 func (c *conn) CreateAuthRequest(ctx context.Context, a storage.AuthRequest) error {
 	_, err := c.Exec(`
 		insert into auth_request (
-			id, client_id, response_types, scopes, redirect_uri, nonce, state,
+			id, client_id, response_types, response_mode, scopes, redirect_uri, nonce, state,
 			force_approval_prompt, logged_in,
 			claims_user_id, claims_username, claims_preferred_username,
 			claims_email, claims_email_verified, claims_groups,
@@ -137,10 +137,10 @@ func (c *conn) CreateAuthRequest(ctx context.Context, a storage.AuthRequest) err
 			hmac_key
 		)
 		values (
-			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21
+			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22
 		);
 	`,
-		a.ID, a.ClientID, encoder(a.ResponseTypes), encoder(a.Scopes), a.RedirectURI, a.Nonce, a.State,
+		a.ID, a.ClientID, encoder(a.ResponseTypes), a.ResponseMode, encoder(a.Scopes), a.RedirectURI, a.Nonce, a.State,
 		a.ForceApprovalPrompt, a.LoggedIn,
 		a.Claims.UserID, a.Claims.Username, a.Claims.PreferredUsername,
 		a.Claims.Email, a.Claims.EmailVerified, encoder(a.Claims.Groups),
@@ -172,18 +172,18 @@ func (c *conn) UpdateAuthRequest(id string, updater func(a storage.AuthRequest) 
 		_, err = tx.Exec(`
 			update auth_request
 			set
-				client_id = $1, response_types = $2, scopes = $3, redirect_uri = $4,
-				nonce = $5, state = $6, force_approval_prompt = $7, logged_in = $8,
-				claims_user_id = $9, claims_username = $10, claims_preferred_username = $11,
-				claims_email = $12, claims_email_verified = $13,
-				claims_groups = $14,
-				connector_id = $15, connector_data = $16,
-				expiry = $17,
-				code_challenge = $18, code_challenge_method = $19,
-				hmac_key = $20
+				client_id = $1, response_types = $2, response_mode = $3, scopes = $4, redirect_uri = $5,
+				nonce = $6, state = $7, force_approval_prompt = $8, logged_in = $9,
+				claims_user_id = $10, claims_username = $11, claims_preferred_username = $12,
+				claims_email = $13, claims_email_verified = $14,
+				claims_groups = $15,
+				connector_id = $16, connector_data = $17,
+				expiry = $18,
+				code_challenge = $19, code_challenge_method = $20,
+				hmac_key = $21
 			where id = $21;
 		`,
-			a.ClientID, encoder(a.ResponseTypes), encoder(a.Scopes), a.RedirectURI, a.Nonce, a.State,
+			a.ClientID, encoder(a.ResponseTypes), a.ResponseMode, encoder(a.Scopes), a.RedirectURI, a.Nonce, a.State,
 			a.ForceApprovalPrompt, a.LoggedIn,
 			a.Claims.UserID, a.Claims.Username, a.Claims.PreferredUsername,
 			a.Claims.Email, a.Claims.EmailVerified,
@@ -207,7 +207,7 @@ func (c *conn) GetAuthRequest(id string) (storage.AuthRequest, error) {
 func getAuthRequest(q querier, id string) (a storage.AuthRequest, err error) {
 	err = q.QueryRow(`
 		select
-			id, client_id, response_types, scopes, redirect_uri, nonce, state,
+			id, client_id, response_types, response_mode, scopes, redirect_uri, nonce, state,
 			force_approval_prompt, logged_in,
 			claims_user_id, claims_username, claims_preferred_username,
 			claims_email, claims_email_verified, claims_groups,
@@ -215,7 +215,7 @@ func getAuthRequest(q querier, id string) (a storage.AuthRequest, err error) {
 			code_challenge, code_challenge_method, hmac_key
 		from auth_request where id = $1;
 	`, id).Scan(
-		&a.ID, &a.ClientID, decoder(&a.ResponseTypes), decoder(&a.Scopes), &a.RedirectURI, &a.Nonce, &a.State,
+		&a.ID, &a.ClientID, decoder(&a.ResponseTypes), &a.ResponseMode, decoder(&a.Scopes), &a.RedirectURI, &a.Nonce, &a.State,
 		&a.ForceApprovalPrompt, &a.LoggedIn,
 		&a.Claims.UserID, &a.Claims.Username, &a.Claims.PreferredUsername,
 		&a.Claims.Email, &a.Claims.EmailVerified,

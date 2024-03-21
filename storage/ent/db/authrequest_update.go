@@ -79,6 +79,20 @@ func (aru *AuthRequestUpdate) ClearResponseTypes() *AuthRequestUpdate {
 	return aru
 }
 
+// SetResponseMode sets the "response_mode" field.
+func (aru *AuthRequestUpdate) SetResponseMode(s string) *AuthRequestUpdate {
+	aru.mutation.SetResponseMode(s)
+	return aru
+}
+
+// SetNillableResponseMode sets the "response_mode" field if the given value is not nil.
+func (aru *AuthRequestUpdate) SetNillableResponseMode(s *string) *AuthRequestUpdate {
+	if s != nil {
+		aru.SetResponseMode(*s)
+	}
+	return aru
+}
+
 // SetRedirectURI sets the "redirect_uri" field.
 func (aru *AuthRequestUpdate) SetRedirectURI(s string) *AuthRequestUpdate {
 	aru.mutation.SetRedirectURI(s)
@@ -377,6 +391,9 @@ func (aru *AuthRequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if aru.mutation.ResponseTypesCleared() {
 		_spec.ClearField(authrequest.FieldResponseTypes, field.TypeJSON)
 	}
+	if value, ok := aru.mutation.ResponseMode(); ok {
+		_spec.SetField(authrequest.FieldResponseMode, field.TypeString, value)
+	}
 	if value, ok := aru.mutation.RedirectURI(); ok {
 		_spec.SetField(authrequest.FieldRedirectURI, field.TypeString, value)
 	}
@@ -506,6 +523,20 @@ func (aruo *AuthRequestUpdateOne) AppendResponseTypes(s []string) *AuthRequestUp
 // ClearResponseTypes clears the value of the "response_types" field.
 func (aruo *AuthRequestUpdateOne) ClearResponseTypes() *AuthRequestUpdateOne {
 	aruo.mutation.ClearResponseTypes()
+	return aruo
+}
+
+// SetResponseMode sets the "response_mode" field.
+func (aruo *AuthRequestUpdateOne) SetResponseMode(s string) *AuthRequestUpdateOne {
+	aruo.mutation.SetResponseMode(s)
+	return aruo
+}
+
+// SetNillableResponseMode sets the "response_mode" field if the given value is not nil.
+func (aruo *AuthRequestUpdateOne) SetNillableResponseMode(s *string) *AuthRequestUpdateOne {
+	if s != nil {
+		aruo.SetResponseMode(*s)
+	}
 	return aruo
 }
 
@@ -836,6 +867,9 @@ func (aruo *AuthRequestUpdateOne) sqlSave(ctx context.Context) (_node *AuthReque
 	}
 	if aruo.mutation.ResponseTypesCleared() {
 		_spec.ClearField(authrequest.FieldResponseTypes, field.TypeJSON)
+	}
+	if value, ok := aruo.mutation.ResponseMode(); ok {
+		_spec.SetField(authrequest.FieldResponseMode, field.TypeString, value)
 	}
 	if value, ok := aruo.mutation.RedirectURI(); ok {
 		_spec.SetField(authrequest.FieldRedirectURI, field.TypeString, value)

@@ -71,15 +71,15 @@ func init() {
 	authrequestFields := schema.AuthRequest{}.Fields()
 	_ = authrequestFields
 	// authrequestDescClaimsPreferredUsername is the schema descriptor for claims_preferred_username field.
-	authrequestDescClaimsPreferredUsername := authrequestFields[14].Descriptor()
+	authrequestDescClaimsPreferredUsername := authrequestFields[15].Descriptor()
 	// authrequest.DefaultClaimsPreferredUsername holds the default value on creation for the claims_preferred_username field.
 	authrequest.DefaultClaimsPreferredUsername = authrequestDescClaimsPreferredUsername.Default.(string)
 	// authrequestDescCodeChallenge is the schema descriptor for code_challenge field.
-	authrequestDescCodeChallenge := authrequestFields[18].Descriptor()
+	authrequestDescCodeChallenge := authrequestFields[19].Descriptor()
 	// authrequest.DefaultCodeChallenge holds the default value on creation for the code_challenge field.
 	authrequest.DefaultCodeChallenge = authrequestDescCodeChallenge.Default.(string)
 	// authrequestDescCodeChallengeMethod is the schema descriptor for code_challenge_method field.
-	authrequestDescCodeChallengeMethod := authrequestFields[19].Descriptor()
+	authrequestDescCodeChallengeMethod := authrequestFields[20].Descriptor()
 	// authrequest.DefaultCodeChallengeMethod holds the default value on creation for the code_challenge_method field.
 	authrequest.DefaultCodeChallengeMethod = authrequestDescCodeChallengeMethod.Default.(string)
 	// authrequestDescID is the schema descriptor for id field.

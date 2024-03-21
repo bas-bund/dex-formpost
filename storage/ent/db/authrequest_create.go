@@ -38,6 +38,12 @@ func (arc *AuthRequestCreate) SetResponseTypes(s []string) *AuthRequestCreate {
 	return arc
 }
 
+// SetResponseMode sets the "response_mode" field.
+func (arc *AuthRequestCreate) SetResponseMode(s string) *AuthRequestCreate {
+	arc.mutation.SetResponseMode(s)
+	return arc
+}
+
 // SetRedirectURI sets the "redirect_uri" field.
 func (arc *AuthRequestCreate) SetRedirectURI(s string) *AuthRequestCreate {
 	arc.mutation.SetRedirectURI(s)
@@ -224,6 +230,9 @@ func (arc *AuthRequestCreate) check() error {
 	if _, ok := arc.mutation.ClientID(); !ok {
 		return &ValidationError{Name: "client_id", err: errors.New(`db: missing required field "AuthRequest.client_id"`)}
 	}
+	if _, ok := arc.mutation.ResponseMode(); !ok {
+		return &ValidationError{Name: "response_mode", err: errors.New(`db: missing required field "AuthRequest.response_mode"`)}
+	}
 	if _, ok := arc.mutation.RedirectURI(); !ok {
 		return &ValidationError{Name: "redirect_uri", err: errors.New(`db: missing required field "AuthRequest.redirect_uri"`)}
 	}
@@ -320,6 +329,10 @@ func (arc *AuthRequestCreate) createSpec() (*AuthRequest, *sqlgraph.CreateSpec) 
 	if value, ok := arc.mutation.ResponseTypes(); ok {
 		_spec.SetField(authrequest.FieldResponseTypes, field.TypeJSON, value)
 		_node.ResponseTypes = value
+	}
+	if value, ok := arc.mutation.ResponseMode(); ok {
+		_spec.SetField(authrequest.FieldResponseMode, field.TypeString, value)
+		_node.ResponseMode = value
 	}
 	if value, ok := arc.mutation.RedirectURI(); ok {
 		_spec.SetField(authrequest.FieldRedirectURI, field.TypeString, value)

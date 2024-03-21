@@ -17,6 +17,8 @@ const (
 	FieldScopes = "scopes"
 	// FieldResponseTypes holds the string denoting the response_types field in the database.
 	FieldResponseTypes = "response_types"
+	// FieldResponseMode holds the string denoting the response_mode field in the database.
+	FieldResponseMode = "response_mode"
 	// FieldRedirectURI holds the string denoting the redirect_uri field in the database.
 	FieldRedirectURI = "redirect_uri"
 	// FieldNonce holds the string denoting the nonce field in the database.
@@ -61,6 +63,7 @@ var Columns = []string{
 	FieldClientID,
 	FieldScopes,
 	FieldResponseTypes,
+	FieldResponseMode,
 	FieldRedirectURI,
 	FieldNonce,
 	FieldState,
@@ -112,6 +115,11 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 // ByClientID orders the results by the client_id field.
 func ByClientID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldClientID, opts...).ToFunc()
+}
+
+// ByResponseMode orders the results by the response_mode field.
+func ByResponseMode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldResponseMode, opts...).ToFunc()
 }
 
 // ByRedirectURI orders the results by the redirect_uri field.

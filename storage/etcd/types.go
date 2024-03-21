@@ -66,6 +66,7 @@ type AuthRequest struct {
 	ClientID string `json:"client_id"`
 
 	ResponseTypes []string `json:"response_types"`
+	ResponseMode  string   `json:"response_mode"`
 	Scopes        []string `json:"scopes"`
 	RedirectURI   string   `json:"redirect_uri"`
 	Nonce         string   `json:"nonce"`
@@ -93,6 +94,7 @@ func fromStorageAuthRequest(a storage.AuthRequest) AuthRequest {
 		ID:                  a.ID,
 		ClientID:            a.ClientID,
 		ResponseTypes:       a.ResponseTypes,
+		ResponseMode:        a.ResponseMode,
 		Scopes:              a.Scopes,
 		RedirectURI:         a.RedirectURI,
 		Nonce:               a.Nonce,
@@ -114,6 +116,7 @@ func toStorageAuthRequest(a AuthRequest) storage.AuthRequest {
 		ID:                  a.ID,
 		ClientID:            a.ClientID,
 		ResponseTypes:       a.ResponseTypes,
+		ResponseMode:        a.ResponseMode,
 		Scopes:              a.Scopes,
 		RedirectURI:         a.RedirectURI,
 		Nonce:               a.Nonce,

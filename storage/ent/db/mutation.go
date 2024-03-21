@@ -1240,6 +1240,7 @@ type AuthRequestMutation struct {
 	appendscopes              []string
 	response_types            *[]string
 	appendresponse_types      []string
+	response_mode             *string
 	redirect_uri              *string
 	nonce                     *string
 	state                     *string
@@ -1532,6 +1533,42 @@ func (m *AuthRequestMutation) ResetResponseTypes() {
 	m.response_types = nil
 	m.appendresponse_types = nil
 	delete(m.clearedFields, authrequest.FieldResponseTypes)
+}
+
+// SetResponseMode sets the "response_mode" field.
+func (m *AuthRequestMutation) SetResponseMode(s string) {
+	m.response_mode = &s
+}
+
+// ResponseMode returns the value of the "response_mode" field in the mutation.
+func (m *AuthRequestMutation) ResponseMode() (r string, exists bool) {
+	v := m.response_mode
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldResponseMode returns the old "response_mode" field's value of the AuthRequest entity.
+// If the AuthRequest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AuthRequestMutation) OldResponseMode(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldResponseMode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldResponseMode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldResponseMode: %w", err)
+	}
+	return oldValue.ResponseMode, nil
+}
+
+// ResetResponseMode resets all changes to the "response_mode" field.
+func (m *AuthRequestMutation) ResetResponseMode() {
+	m.response_mode = nil
 }
 
 // SetRedirectURI sets the "redirect_uri" field.
@@ -2222,7 +2259,7 @@ func (m *AuthRequestMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AuthRequestMutation) Fields() []string {
-	fields := make([]string, 0, 20)
+	fields := make([]string, 0, 21)
 	if m.client_id != nil {
 		fields = append(fields, authrequest.FieldClientID)
 	}
@@ -2231,6 +2268,9 @@ func (m *AuthRequestMutation) Fields() []string {
 	}
 	if m.response_types != nil {
 		fields = append(fields, authrequest.FieldResponseTypes)
+	}
+	if m.response_mode != nil {
+		fields = append(fields, authrequest.FieldResponseMode)
 	}
 	if m.redirect_uri != nil {
 		fields = append(fields, authrequest.FieldRedirectURI)
@@ -2297,6 +2337,8 @@ func (m *AuthRequestMutation) Field(name string) (ent.Value, bool) {
 		return m.Scopes()
 	case authrequest.FieldResponseTypes:
 		return m.ResponseTypes()
+	case authrequest.FieldResponseMode:
+		return m.ResponseMode()
 	case authrequest.FieldRedirectURI:
 		return m.RedirectURI()
 	case authrequest.FieldNonce:
@@ -2346,6 +2388,8 @@ func (m *AuthRequestMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldScopes(ctx)
 	case authrequest.FieldResponseTypes:
 		return m.OldResponseTypes(ctx)
+	case authrequest.FieldResponseMode:
+		return m.OldResponseMode(ctx)
 	case authrequest.FieldRedirectURI:
 		return m.OldRedirectURI(ctx)
 	case authrequest.FieldNonce:
@@ -2409,6 +2453,13 @@ func (m *AuthRequestMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetResponseTypes(v)
+		return nil
+	case authrequest.FieldResponseMode:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetResponseMode(v)
 		return nil
 	case authrequest.FieldRedirectURI:
 		v, ok := value.(string)
@@ -2613,6 +2664,9 @@ func (m *AuthRequestMutation) ResetField(name string) error {
 		return nil
 	case authrequest.FieldResponseTypes:
 		m.ResetResponseTypes()
+		return nil
+	case authrequest.FieldResponseMode:
+		m.ResetResponseMode()
 		return nil
 	case authrequest.FieldRedirectURI:
 		m.ResetRedirectURI()

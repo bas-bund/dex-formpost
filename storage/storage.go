@@ -202,6 +202,7 @@ type AuthRequest struct {
 	// Values parsed from the initial request. These describe the resources the client is
 	// requesting as well as values describing the form of the response.
 	ResponseTypes []string
+	ResponseMode  string
 	Scopes        []string
 	RedirectURI   string
 	Nonce         string

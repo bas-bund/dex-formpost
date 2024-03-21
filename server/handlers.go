@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"maps"
 	"net/http"
 	"net/url"
 	"path"
@@ -30,6 +31,32 @@ const (
 	codeChallengeMethodPlain = "plain"
 	codeChallengeMethodS256  = "S256"
 )
+
+var formPostTemplate = template.Must(template.New("form_post").Parse(`<!DOCTYPE html>
+<html>
+  <head>
+	<title>OIDC form_post response</title>
+  </head>
+  <body onload="document.forms[0].submit()">
+	<form method="POST" action="{{.RedirectURL}}">
+	  {{range $name, $values := .Values}}
+		{{range $index, $value := $values}}
+		  <input type="hidden" name="{{$name}}" value="{{$value}}"/>
+		{{end}}
+	  {{end}}
+	  <noscript>
+		<p>JavaScript is disabled. Be advised to enable it. Click below to continue.</p>
+		<input name="continue" type="submit" value="CONTINUE"/>
+	  </noscript>
+	</form>
+  </body>
+</html>
+`))
+
+type FormPostValues struct {
+	RedirectURL string
+	Values      *url.Values
+}
 
 func (s *Server) handlePublicKeys(w http.ResponseWriter, r *http.Request) {
 	// TODO(ericchiang): Cache this.
@@ -285,16 +312,16 @@ func (s *Server) handleConnectorLogin(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(w, `<!DOCTYPE html>
 			  <html lang="en">
 			  <head>
-			    <meta http-equiv="content-type" content="text/html; charset=utf-8">
-			    <title>SAML login</title>
+				<meta http-equiv="content-type" content="text/html; charset=utf-8">
+				<title>SAML login</title>
 			  </head>
 			  <body>
-			    <form method="post" action="%s" >
-				    <input type="hidden" name="SAMLRequest" value="%s" />
-				    <input type="hidden" name="RelayState" value="%s" />
-			    </form>
+				<form method="post" action="%s" >
+					<input type="hidden" name="SAMLRequest" value="%s" />
+					<input type="hidden" name="RelayState" value="%s" />
+				</form>
 				<script>
-				    document.forms[0].submit();
+					document.forms[0].submit();
 				</script>
 			  </body>
 			  </html>`, action, value, authReq.ID)
@@ -684,6 +711,9 @@ func (s *Server) sendCodeResponse(w http.ResponseWriter, r *http.Request, authRe
 
 		// Access token
 		accessToken string
+
+		formPost         = false
+		returnInFragment = false
 	)
 
 	for _, responseType := range authReq.ResponseTypes {
@@ -737,8 +767,37 @@ func (s *Server) sendCodeResponse(w http.ResponseWriter, r *http.Request, authRe
 		}
 	}
 
+	switch authReq.ResponseMode {
+	case responseModeFormPost:
+		// return values vie form POST (see formPostTemplate)
+		formPost = true
+	case responseModeFragment:
+		// return values as part of the fragment
+		//
+		//   HTTP/1.1 303 See Other
+		//   Location: https://client.example.org/cb#
+		//     access_token=SlAV32hkKG
+		//     &token_type=bearer
+		//     &id_token=eyJ0 ... NiJ9.eyJ1c ... I6IjIifX0.DeWt4Qu ... ZXso
+		//     &expires_in=3600
+		//     &state=af0ifjsldkj
+		returnInFragment = true
+	case responseModeQuery:
+		// default: return values as part of the query string
+		//
+		//   HTTP/1.1 303 See Other
+		//   Location: https://client.example.org/cb?
+		//     code=SplxlOBeZQQYbYS6WxSbIA
+		//     &state=af0ifjsldkj
+	default:
+		if implicitOrHybrid {
+			returnInFragment = true
+		}
+	}
+
+	v := url.Values{}
+
 	if implicitOrHybrid {
-		v := url.Values{}
 		v.Set("access_token", accessToken)
 		v.Set("token_type", "bearer")
 		v.Set("state", authReq.State)
@@ -756,33 +815,31 @@ func (s *Server) sendCodeResponse(w http.ResponseWriter, r *http.Request, authRe
 		if code.ID != "" {
 			v.Set("code", code.ID)
 		}
-
-		// Implicit and hybrid flows return their values as part of the fragment.
-		//
-		//   HTTP/1.1 303 See Other
-		//   Location: https://client.example.org/cb#
-		//     access_token=SlAV32hkKG
-		//     &token_type=bearer
-		//     &id_token=eyJ0 ... NiJ9.eyJ1c ... I6IjIifX0.DeWt4Qu ... ZXso
-		//     &expires_in=3600
-		//     &state=af0ifjsldkj
-		//
-		u.Fragment = v.Encode()
 	} else {
-		// The code flow add values to the URL query.
-		//
-		//   HTTP/1.1 303 See Other
-		//   Location: https://client.example.org/cb?
-		//     code=SplxlOBeZQQYbYS6WxSbIA
-		//     &state=af0ifjsldkj
-		//
+		v.Set("code", code.ID)
+		v.Set("state", authReq.State)
+	}
+
+	if returnInFragment {
+		u.Fragment = v.Encode()
+	} else if !formPost {
 		q := u.Query()
-		q.Set("code", code.ID)
-		q.Set("state", authReq.State)
+		maps.Copy(q, v)
 		u.RawQuery = q.Encode()
 	}
 
-	http.Redirect(w, r, u.String(), http.StatusSeeOther)
+	if formPost {
+		err = formPostTemplate.Execute(w, FormPostValues{
+			RedirectURL: u.String(),
+			Values:      &v})
+		if err != nil {
+			s.logger.Errorf("failed to render form_post template: %v", err)
+			s.tokenErrHelper(w, errServerError, "", http.StatusInternalServerError)
+			return
+		}
+	} else {
+		http.Redirect(w, r, u.String(), http.StatusSeeOther)
+	}
 }
 
 func (s *Server) withClientFromStorage(w http.ResponseWriter, r *http.Request, handler func(http.ResponseWriter, *http.Request, storage.Client)) {

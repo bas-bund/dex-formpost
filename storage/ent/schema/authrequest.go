@@ -50,6 +50,8 @@ func (AuthRequest) Fields() []ent.Field {
 			Optional(),
 		field.JSON("response_types", []string{}).
 			Optional(),
+		field.Text("response_mode").
+			SchemaType(textSchema),
 		field.Text("redirect_uri").
 			SchemaType(textSchema),
 		field.Text("nonce").

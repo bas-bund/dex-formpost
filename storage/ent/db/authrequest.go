@@ -24,6 +24,8 @@ type AuthRequest struct {
 	Scopes []string `json:"scopes,omitempty"`
 	// ResponseTypes holds the value of the "response_types" field.
 	ResponseTypes []string `json:"response_types,omitempty"`
+	// ResponseMode holds the value of the "response_mode" field.
+	ResponseMode string `json:"response_mode,omitempty"`
 	// RedirectURI holds the value of the "redirect_uri" field.
 	RedirectURI string `json:"redirect_uri,omitempty"`
 	// Nonce holds the value of the "nonce" field.
@@ -70,7 +72,7 @@ func (*AuthRequest) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case authrequest.FieldForceApprovalPrompt, authrequest.FieldLoggedIn, authrequest.FieldClaimsEmailVerified:
 			values[i] = new(sql.NullBool)
-		case authrequest.FieldID, authrequest.FieldClientID, authrequest.FieldRedirectURI, authrequest.FieldNonce, authrequest.FieldState, authrequest.FieldClaimsUserID, authrequest.FieldClaimsUsername, authrequest.FieldClaimsEmail, authrequest.FieldClaimsPreferredUsername, authrequest.FieldConnectorID, authrequest.FieldCodeChallenge, authrequest.FieldCodeChallengeMethod:
+		case authrequest.FieldID, authrequest.FieldClientID, authrequest.FieldResponseMode, authrequest.FieldRedirectURI, authrequest.FieldNonce, authrequest.FieldState, authrequest.FieldClaimsUserID, authrequest.FieldClaimsUsername, authrequest.FieldClaimsEmail, authrequest.FieldClaimsPreferredUsername, authrequest.FieldConnectorID, authrequest.FieldCodeChallenge, authrequest.FieldCodeChallengeMethod:
 			values[i] = new(sql.NullString)
 		case authrequest.FieldExpiry:
 			values[i] = new(sql.NullTime)
@@ -116,6 +118,12 @@ func (ar *AuthRequest) assignValues(columns []string, values []any) error {
 				if err := json.Unmarshal(*value, &ar.ResponseTypes); err != nil {
 					return fmt.Errorf("unmarshal field response_types: %w", err)
 				}
+			}
+		case authrequest.FieldResponseMode:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field response_mode", values[i])
+			} else if value.Valid {
+				ar.ResponseMode = value.String
 			}
 		case authrequest.FieldRedirectURI:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -265,6 +273,9 @@ func (ar *AuthRequest) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("response_types=")
 	builder.WriteString(fmt.Sprintf("%v", ar.ResponseTypes))
+	builder.WriteString(", ")
+	builder.WriteString("response_mode=")
+	builder.WriteString(ar.ResponseMode)
 	builder.WriteString(", ")
 	builder.WriteString("redirect_uri=")
 	builder.WriteString(ar.RedirectURI)

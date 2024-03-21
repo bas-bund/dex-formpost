@@ -155,6 +155,12 @@ const (
 )
 
 const (
+	responseModeQuery    = "query"
+	responseModeFragment = "fragment"
+	responseModeFormPost = "form_post"
+)
+
+const (
 	deviceTokenPending  = "authorization_pending"
 	deviceTokenComplete = "complete"
 	deviceTokenSlowDown = "slow_down"
@@ -440,6 +446,7 @@ func (s *Server) parseAuthorizationRequest(r *http.Request) (*storage.AuthReques
 	// Some clients, like the old go-oidc, provide extra whitespace. Tolerate this.
 	scopes := strings.Fields(q.Get("scope"))
 	responseTypes := strings.Fields(q.Get("response_type"))
+	responseMode := q.Get("response_mode")
 
 	codeChallenge := q.Get("code_challenge")
 	codeChallengeMethod := q.Get("code_challenge_method")
@@ -585,6 +592,7 @@ func (s *Server) parseAuthorizationRequest(r *http.Request) (*storage.AuthReques
 		Scopes:              scopes,
 		RedirectURI:         redirectURI,
 		ResponseTypes:       responseTypes,
+		ResponseMode:        responseMode,
 		ConnectorID:         connectorID,
 		PKCE: storage.PKCE{
 			CodeChallenge:       codeChallenge,

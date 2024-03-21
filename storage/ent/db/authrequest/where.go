@@ -69,6 +69,11 @@ func ClientID(v string) predicate.AuthRequest {
 	return predicate.AuthRequest(sql.FieldEQ(FieldClientID, v))
 }
 
+// ResponseMode applies equality check predicate on the "response_mode" field. It's identical to ResponseModeEQ.
+func ResponseMode(v string) predicate.AuthRequest {
+	return predicate.AuthRequest(sql.FieldEQ(FieldResponseMode, v))
+}
+
 // RedirectURI applies equality check predicate on the "redirect_uri" field. It's identical to RedirectURIEQ.
 func RedirectURI(v string) predicate.AuthRequest {
 	return predicate.AuthRequest(sql.FieldEQ(FieldRedirectURI, v))
@@ -232,6 +237,71 @@ func ResponseTypesIsNil() predicate.AuthRequest {
 // ResponseTypesNotNil applies the NotNil predicate on the "response_types" field.
 func ResponseTypesNotNil() predicate.AuthRequest {
 	return predicate.AuthRequest(sql.FieldNotNull(FieldResponseTypes))
+}
+
+// ResponseModeEQ applies the EQ predicate on the "response_mode" field.
+func ResponseModeEQ(v string) predicate.AuthRequest {
+	return predicate.AuthRequest(sql.FieldEQ(FieldResponseMode, v))
+}
+
+// ResponseModeNEQ applies the NEQ predicate on the "response_mode" field.
+func ResponseModeNEQ(v string) predicate.AuthRequest {
+	return predicate.AuthRequest(sql.FieldNEQ(FieldResponseMode, v))
+}
+
+// ResponseModeIn applies the In predicate on the "response_mode" field.
+func ResponseModeIn(vs ...string) predicate.AuthRequest {
+	return predicate.AuthRequest(sql.FieldIn(FieldResponseMode, vs...))
+}
+
+// ResponseModeNotIn applies the NotIn predicate on the "response_mode" field.
+func ResponseModeNotIn(vs ...string) predicate.AuthRequest {
+	return predicate.AuthRequest(sql.FieldNotIn(FieldResponseMode, vs...))
+}
+
+// ResponseModeGT applies the GT predicate on the "response_mode" field.
+func ResponseModeGT(v string) predicate.AuthRequest {
+	return predicate.AuthRequest(sql.FieldGT(FieldResponseMode, v))
+}
+
+// ResponseModeGTE applies the GTE predicate on the "response_mode" field.
+func ResponseModeGTE(v string) predicate.AuthRequest {
+	return predicate.AuthRequest(sql.FieldGTE(FieldResponseMode, v))
+}
+
+// ResponseModeLT applies the LT predicate on the "response_mode" field.
+func ResponseModeLT(v string) predicate.AuthRequest {
+	return predicate.AuthRequest(sql.FieldLT(FieldResponseMode, v))
+}
+
+// ResponseModeLTE applies the LTE predicate on the "response_mode" field.
+func ResponseModeLTE(v string) predicate.AuthRequest {
+	return predicate.AuthRequest(sql.FieldLTE(FieldResponseMode, v))
+}
+
+// ResponseModeContains applies the Contains predicate on the "response_mode" field.
+func ResponseModeContains(v string) predicate.AuthRequest {
+	return predicate.AuthRequest(sql.FieldContains(FieldResponseMode, v))
+}
+
+// ResponseModeHasPrefix applies the HasPrefix predicate on the "response_mode" field.
+func ResponseModeHasPrefix(v string) predicate.AuthRequest {
+	return predicate.AuthRequest(sql.FieldHasPrefix(FieldResponseMode, v))
+}
+
+// ResponseModeHasSuffix applies the HasSuffix predicate on the "response_mode" field.
+func ResponseModeHasSuffix(v string) predicate.AuthRequest {
+	return predicate.AuthRequest(sql.FieldHasSuffix(FieldResponseMode, v))
+}
+
+// ResponseModeEqualFold applies the EqualFold predicate on the "response_mode" field.
+func ResponseModeEqualFold(v string) predicate.AuthRequest {
+	return predicate.AuthRequest(sql.FieldEqualFold(FieldResponseMode, v))
+}
+
+// ResponseModeContainsFold applies the ContainsFold predicate on the "response_mode" field.
+func ResponseModeContainsFold(v string) predicate.AuthRequest {
+	return predicate.AuthRequest(sql.FieldContainsFold(FieldResponseMode, v))
 }
 
 // RedirectURIEQ applies the EQ predicate on the "redirect_uri" field.
