@@ -829,6 +829,9 @@ func (s *Server) sendCodeResponse(w http.ResponseWriter, r *http.Request, authRe
 	}
 
 	if formPost {
+		w.Header().Set("Content-Type", "text/html")
+		w.Header().Set("Cache-Control", "no-cache, no-store")
+		w.Header().Set("Pragma", "no-cache")
 		err = formPostTemplate.Execute(w, FormPostValues{
 			RedirectURL: u.String(),
 			Values:      &v})
