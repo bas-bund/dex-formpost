@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -357,6 +358,7 @@ func TestHandlePasswordLoginWithSkipApproval(t *testing.T) {
 	authReqID := "test"
 	expiry := time.Now().Add(100 * time.Second)
 	resTypes := []string{responseTypeCode}
+	resTypesIDToken := []string{responseTypeIDToken}
 
 	tests := []struct {
 		name                  string
@@ -451,6 +453,22 @@ func TestHandlePasswordLoginWithSkipApproval(t *testing.T) {
 			expectedRes:           "/auth/mockPw/cb",
 			offlineSessionCreated: false,
 		},
+		{
+			name:         "Form POST",
+			skipApproval: true,
+			authReq: storage.AuthRequest{
+				ID:                  authReqID,
+				ConnectorID:         connID,
+				RedirectURI:         "cb",
+				ResponseMode:        "form_post",
+				Expiry:              expiry,
+				ResponseTypes:       resTypesIDToken,
+				ForceApprovalPrompt: false,
+				State:               `<state="state">`,
+			},
+			expectedRes:           `<input type="hidden" name="id_token" value="`,
+			offlineSessionCreated: false,
+		},
 	}
 
 	for _, tc := range tests {
@@ -483,14 +501,24 @@ func TestHandlePasswordLoginWithSkipApproval(t *testing.T) {
 			path := fmt.Sprintf("/auth/%s/login?state=%s&back=&login=foo&password=password", connID, authReqID)
 			s.handlePasswordLogin(rr, httptest.NewRequest("POST", path, nil))
 
-			require.Equal(t, 303, rr.Code)
-
 			resp := rr.Result()
 
 			defer resp.Body.Close()
 
-			cb, _ := url.Parse(resp.Header.Get("Location"))
-			require.Equal(t, tc.expectedRes, cb.Path)
+			if tc.authReq.ResponseMode != "form_post" {
+				require.Equal(t, 303, rr.Code)
+				cb, _ := url.Parse(resp.Header.Get("Location"))
+				require.Equal(t, tc.expectedRes, cb.Path)
+			} else {
+				require.Equal(t, 200, rr.Code)
+				b, err := io.ReadAll(resp.Body)
+				require.Equal(t, err, nil)
+				require.Contains(t, resp.Header.Get("Content-Type"), "text/html")
+				require.Contains(t, resp.Header.Get("Cache-Control"), "no-cache")
+				require.Contains(t, string(b), tc.expectedRes)
+				require.Contains(t, string(b),
+					`<input type="hidden" name="state" value="&lt;state=&#34;state&#34;&gt;"/>`)
+			}
 
 			offlineSession, err := s.storage.GetOfflineSessions("0-385-28089-0", connID)
 			if tc.offlineSessionCreated {
