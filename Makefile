@@ -17,6 +17,8 @@ VERSION  ?= $(shell ./scripts/git-version)
 export GOBIN=$(PWD)/bin
 LD_FLAGS="-w -X main.version=$(VERSION)"
 
+RELEASE_BIN ?= /go/bin
+
 # Dependency versions
 GOLANGCI_VERSION   = 1.56.2
 GOTESTSUM_VERSION ?= 1.10.1
@@ -39,8 +41,8 @@ examples: bin/grpc-client bin/example-app ## Build example app.
 .PHONY: release-binary
 release-binary: LD_FLAGS = "-w -X main.version=$(VERSION) -extldflags \"-static\""
 release-binary: ## Build release binaries (used to build a final container image).
-	@go build -o /go/bin/dex -v -ldflags $(LD_FLAGS) $(REPO_PATH)/cmd/dex
-	@go build -o /go/bin/docker-entrypoint -v -ldflags $(LD_FLAGS) $(REPO_PATH)/cmd/docker-entrypoint
+	@go build -o $(RELEASE_BIN)/dex -v -ldflags $(LD_FLAGS) $(REPO_PATH)/cmd/dex
+	@go build -o $(RELEASE_BIN)/docker-entrypoint -v -ldflags $(LD_FLAGS) $(REPO_PATH)/cmd/docker-entrypoint
 
 bin/dex:
 	@mkdir -p bin/
@@ -202,8 +204,8 @@ help:
 	"-----------------------" \
 	""
 	@awk 'BEGIN {\
-	    FS = ":.*##"; \
-	    printf                "Usage: ${FORMATTING_BEGIN_BLUE}OPTION${FORMATTING_END}=<value> make ${FORMATTING_BEGIN_YELLOW}<target>${FORMATTING_END}\n"\
+		FS = ":.*##"; \
+		printf                "Usage: ${FORMATTING_BEGIN_BLUE}OPTION${FORMATTING_END}=<value> make ${FORMATTING_BEGIN_YELLOW}<target>${FORMATTING_END}\n"\
 	  } \
 	  /^[a-zA-Z0-9_-]+:.*?##/ { printf "  ${FORMATTING_BEGIN_BLUE}%-46s${FORMATTING_END} %s\n", $$1, $$2 } \
 	  /^.?.?##~/              { printf "   %-46s${FORMATTING_BEGIN_YELLOW}%-46s${FORMATTING_END}\n", "", substr($$1, 6) } \
