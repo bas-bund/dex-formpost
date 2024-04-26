@@ -828,6 +828,8 @@ func (s *Server) sendCodeResponse(w http.ResponseWriter, r *http.Request, authRe
 		u.RawQuery = q.Encode()
 	}
 
+	s.logger.Debugf("auth response: response_mode=%v url=%v values=%v", authReq.ResponseMode, u.String(), v)
+
 	if formPost {
 		w.Header().Set("Content-Type", "text/html")
 		w.Header().Set("Cache-Control", "no-cache, no-store")
